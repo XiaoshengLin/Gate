@@ -58,9 +58,12 @@ GatePhaseSpaceActorMessenger::~GatePhaseSpaceActorMessenger()
   delete bEnableCompactCmd;
   delete bEnableEmissionPointCmd;
   delete bEnablePDGCodeCmd;
+  delete pEnableNuclearFlagCmd;
   delete bEnableSphereProjection;
   delete bSetSphereProjectionCenter;
   delete bSetSphereProjectionRadius;
+  delete bEnableTranslationAlongDirection;
+  delete bSetTranslationAlongDirectionLength;
 }
 //-----------------------------------------------------------------------------
 
@@ -232,6 +235,12 @@ void GatePhaseSpaceActorMessenger::BuildCommands(G4String base)
   guidance = "Output the PDGCode instead of the ParticleName.";
   bEnablePDGCodeCmd->SetGuidance(guidance);
 
+  bb = base+"/enableNuclearFlag";
+  pEnableNuclearFlagCmd = new G4UIcmdWithABool(bb,this);
+  guidance = "Save nuclear flags of particles in the phase space file.";
+  pEnableNuclearFlagCmd->SetGuidance(guidance);
+  pEnableNuclearFlagCmd->SetParameterName("State",false);
+
   bb = base+"/enableSphereProjection";
   bEnableSphereProjection = new G4UIcmdWithABool(bb, this);
   guidance = "Change the particle position point: project it on a sphere";
@@ -246,6 +255,30 @@ void GatePhaseSpaceActorMessenger::BuildCommands(G4String base)
   bSetSphereProjectionRadius = new G4UIcmdWithADoubleAndUnit(bb, this);
   guidance = "Set the radius of the sphere where the points are projected";
   bSetSphereProjectionRadius->SetGuidance(guidance);
+
+  bb = base+"/enableTranslationAlongDirection";
+  bEnableTranslationAlongDirection = new G4UIcmdWithABool(bb, this);
+  guidance = "Change the particle position point: translate along the direction";
+  bEnableTranslationAlongDirection->SetGuidance(guidance);
+
+  bb = base+"/setTranslationAlongDirectionLength";
+  bSetTranslationAlongDirectionLength = new G4UIcmdWithADoubleAndUnit(bb, this);
+  guidance = "Set the translation length";
+  bSetTranslationAlongDirectionLength->SetGuidance(guidance);
+
+  bb = base+"/enableTOut";
+  pEnableTOutCmd = new G4UIcmdWithABool(bb,this);
+  guidance = "Store the time taken from the production to the leaving of the volume. Usefull only for the outgoing particles";
+  pEnableTOutCmd->SetGuidance(guidance);
+  pEnableTOutCmd->SetParameterName("State",false);
+
+  bb = base+"/enableTProd";
+  pEnableTProdCmd = new G4UIcmdWithABool(bb,this);
+  guidance = "Save the production time of the particle wrt to the primary production (defined as a GlobalTime - LocalTime)";
+  pEnableTProdCmd->SetGuidance(guidance);
+  pEnableTProdCmd->SetParameterName("State",false);
+
+
 }
 //-----------------------------------------------------------------------------
 
@@ -283,9 +316,16 @@ void GatePhaseSpaceActorMessenger::SetNewValue(G4UIcommand* command, G4String pa
   if(command == bSpotIDFromSourceCmd) {pActor->SetSpotIDFromSource(param);pActor->SetIsSpotIDEnabled();};
   if(command == bEnablePDGCodeCmd) pActor->SetEnablePDGCode(bEnablePDGCodeCmd->GetNewBoolValue(param));
   if(command == bEnableCompactCmd) pActor->SetEnabledCompact(bEnableCompactCmd->GetNewBoolValue(param));
+  if(command == pEnableNuclearFlagCmd) pActor->SetIsNuclearFlagEnabled(pEnableNuclearFlagCmd->GetNewBoolValue(param));
   if(command == bEnableSphereProjection) pActor->SetEnabledSphereProjection(bEnableSphereProjection->GetNewBoolValue(param));
   if(command == bSetSphereProjectionCenter) pActor->SetSphereProjectionCenter(bSetSphereProjectionCenter->GetNew3VectorValue(param));
   if(command == bSetSphereProjectionRadius) pActor->SetSphereProjectionRadius(bSetSphereProjectionRadius->GetNewDoubleValue(param));
+
+  if(command == bEnableTranslationAlongDirection) pActor->SetEnabledTranslationAlongDirection(bEnableTranslationAlongDirection->GetNewBoolValue(param));
+  if(command == bSetTranslationAlongDirectionLength) pActor->SetTranslationAlongDirectionLength(bSetTranslationAlongDirectionLength->GetNewDoubleValue(param));
+
+  if(command == pEnableTOutCmd) pActor->SetIsTOutEnabled(pEnableTOutCmd->GetNewBoolValue(param));
+  if(command == pEnableTProdCmd) pActor->SetIsTProdEnabled(pEnableTProdCmd->GetNewBoolValue(param));
 
   GateActorMessenger::SetNewValue(command ,param );
 }
